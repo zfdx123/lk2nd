@@ -42,6 +42,8 @@ int parse_boot_entry_file(struct boot_entry *entry, struct dirent ent) {
 	unsigned char *buf;
 
 	char *path = malloc(strlen(ent.name) + strlen(ENTRIES_DIR"/") + 1);
+	if(!path)
+		return ERR_NO_MEMORY;
 	strcpy(path, ENTRIES_DIR"/");
 	strcat(path, ent.name);
 
@@ -134,12 +136,21 @@ int parse_boot_entries(struct boot_entry **_entry_list) {
 	ret = entry_count = dir_count_entries(ENTRIES_DIR);
 	if (ret < 0) {
 		entry_count = 0;
+		fs_unmount("/boot");
 		return ret;
 	}
+
+	if(entry_count == 0) {
+		fs_unmount("/boot");
+		printf("NOTICE: no boot entries found\n");
+		return 0;
+	}
+
 
 	entry_list = malloc(entry_count * sizeof(struct boot_entry));
 	if(!entry_list) {
 		entry_count = 0;
+		fs_unmount("/boot");
 		return ERR_NO_MEMORY;
 	}
 
@@ -150,6 +161,7 @@ int parse_boot_entries(struct boot_entry **_entry_list) {
 	if(ret < 0) {
 		printf("fs_open_dir ret: %d\n", ret);
 		entry_count = 0;
+		fs_unmount("/boot");
 		return ret;
 	}
 
@@ -185,13 +197,22 @@ int parse_global_config(struct global_config *global_config) {
 	}
 
 	off_t entry_file_size = fs_get_file_size(GLOBAL_CONFIG_FILE);
+	if(!entry_file_size) {
+		fs_unmount("/boot");
+		printf("NOTICE: can't stat lk2nd.conf, does it exist?\n");
+		return 0;
+	}
+
 	buf = malloc(entry_file_size + 1);
-	if(!buf)
+	if(!buf) {
+		fs_unmount("/boot");
 		return ERR_NO_MEMORY;
+	}
 
 	ret = fs_open_file(GLOBAL_CONFIG_FILE, &global_config_file_handle);
 	printf("fs_open_file ret: %d\n", ret);
 	if(ret < 0) {
+		fs_unmount("/boot");
 		return ret;
 	}
 
@@ -199,6 +220,7 @@ int parse_global_config(struct global_config *global_config) {
 	printf("fs_read_file ret: %d\n", ret);
 	if(ret < 0) {
 		free(buf);
+		fs_unmount("/boot");
 		return ret;
 	}
 
@@ -206,6 +228,7 @@ int parse_global_config(struct global_config *global_config) {
 	printf("fs_close_file ret: %d\n", ret);
 	if(ret) {
 		free(buf);
+		fs_unmount("/boot");
 		return ret;
 	}
 

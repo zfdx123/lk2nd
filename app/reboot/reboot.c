@@ -48,17 +48,16 @@ void reboot_init(const struct app_descriptor *app)
 	ret = parse_global_config(&global_config);
 	if(ret < 0) {
 		printf("falied to parse global config: %d\n", ret);
-		start_fastboot();
-		return;
+
+		global_config.default_entry_title = NULL;
+		global_config.charger_entry_title = NULL;
+		global_config.timeout = 0;
 	}
 
 	struct boot_entry *entry_list = NULL;
 	ret = parse_boot_entries(&entry_list);
-	if (ret < 0) {
+	if (ret < 0)
 		printf("falied to parse boot entries: %d\n", ret);
-		start_fastboot();
-		return;
-	}
 
 	if(pon_reason_is_charger && global_config.charger_entry_title) {
 		global_config.default_entry = get_entry_by_title(entry_list, global_config.charger_entry_title);
