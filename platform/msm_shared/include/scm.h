@@ -49,7 +49,7 @@
 #define SCM_MAX_ARG_LEN                        5
 #define SCM_INDIR_MAX_LEN                      10
 
-enum
+extern enum
 {
 	SMC_PARAM_TYPE_VALUE = 0,
 	SMC_PARAM_TYPE_BUFFER_READ,
@@ -169,7 +169,7 @@ typedef struct {
 struct tz_prng_data {
 	uint8_t *out_buf;
 	uint32_t out_buf_size;
-}__packed;
+}__attribute__((__packed__));
 
 typedef struct {
 	uint8_t *in_buf;

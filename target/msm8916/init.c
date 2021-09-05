@@ -99,6 +99,8 @@ void target_early_init(void)
 #endif
 }
 
+uintptr_t __stack_chk_guard;
+
 void target_sdc_init()
 {
 	struct mmc_config_data config;
