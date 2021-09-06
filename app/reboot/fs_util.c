@@ -13,16 +13,22 @@ off_t fs_get_file_size(const char *filename) {
 	int ret;
 
 	ret = fs_open_file(filename, &file_handle);
-	if(ret < 0)
+	if(ret < 0) {
+		printf("can't stat file: ret: %d\n", ret);
 		return 0;
+	}
 
 	ret = fs_stat_file(file_handle, &file_stat);
-	if(ret < 0)
+	if(ret < 0) {
+		printf("can't stat file: ret: %d\n", ret);
 		return 0;
+	}
 
 	ret = fs_close_file(file_handle);
-	if (ret < 0)
+	if (ret < 0) {
+		printf("can't stat file: ret: %d\n", ret);
 		return 0;
+	}
 
 	return file_stat.size;
 }

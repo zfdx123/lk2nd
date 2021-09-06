@@ -17,7 +17,7 @@
 #include "config.h"
 #include "fs_util.h"
 
-static int boot_linux_from_ext2(char *kernel_path, char *ramdisk_path, char *dtb_path, char *cmdline) {
+static int boot_linux_from_ext2(const char *block_device, char *kernel_path, char *ramdisk_path, char *dtb_path, char *cmdline) {
 	void *kernel_addr = VA((addr_t)(ABOOT_FORCE_KERNEL64_ADDR));
 	void *ramdisk_addr = VA((addr_t)(ABOOT_FORCE_RAMDISK_ADDR));
 	void *tags_addr = VA((addr_t)(ABOOT_FORCE_TAGS_ADDR));
@@ -30,9 +30,9 @@ static int boot_linux_from_ext2(char *kernel_path, char *ramdisk_path, char *dtb
 	unsigned int dev_null;
 	int ret;
 
-	printf("booting from ext2 partition 'system'\n");
+	printf("booting from ext2 partition '%s'\n", block_device);
 
-	if(fs_mount("/boot", "ext2", "hd1p25")) {
+	if(fs_mount("/boot", "ext2", block_device)) {
 		printf("fs_mount failed\n");
 		return -1;
 	}
@@ -113,6 +113,6 @@ int boot_to_entry(struct boot_entry *entry) {
 		strcpy(dtb, "/boot/");
 		strcat(dtb, entry->dtb);
 
-		return boot_linux_from_ext2(linux, initrd, dtb, entry->options); // only returns on error
+		return boot_linux_from_ext2(entry->block_device, linux, initrd, dtb, entry->options); // only returns on error
 	}
 }

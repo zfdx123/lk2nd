@@ -116,18 +116,14 @@ int parse_boot_entry_file(struct boot_entry *entry, struct dirent ent) {
 	return 0;
 }
 
-int entry_count;
+int parse_boot_entries(const char *block_device, struct boot_entry **_entry_list) {
+	int entry_count;
 
-int get_entry_count(void) {
-	return entry_count;
-}
-
-int parse_boot_entries(struct boot_entry **_entry_list) {
 	int ret;
 
 	struct boot_entry *entry_list;
 
-	ret = fs_mount("/boot", "ext2", "hd1p25"); //system
+	ret = fs_mount("/boot", "ext2", block_device); //system
 	printf("fs_mount ret: %d\n", ret);
 	if(ret) {
 		return ret;
@@ -174,6 +170,7 @@ int parse_boot_entries(struct boot_entry **_entry_list) {
 			entry->error = true;
 			entry->title = "SYNTAX ERROR";
 		}
+		entry->block_device = block_device;
 		i++;
 	}
 	fs_close_dir(dirhandle);
@@ -182,15 +179,15 @@ int parse_boot_entries(struct boot_entry **_entry_list) {
 	
 	*_entry_list = entry_list;
 	
-	return 0;
+	return entry_count;
 }
 
-int parse_global_config(struct global_config *global_config) {
+int parse_global_config(const char *block_device, struct global_config *global_config) {
 	int ret;
 	filehandle *global_config_file_handle = NULL;
 	unsigned char *buf;
 
-	ret = fs_mount("/boot", "ext2", "hd1p25"); //system
+	ret = fs_mount("/boot", "ext2", block_device); //system
 	printf("fs_mount ret: %d\n", ret);
 	if(ret) {
 		return ret;

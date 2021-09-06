@@ -56,5 +56,7 @@ void fastboot_fail(const char *reason);
 void fastboot_info(const char *reason);
 void fastboot_stage(const void *data, unsigned sz);
 
+unsigned int fastboot_get_staged_size();
+void fastboot_get_staged(const void *data);
 
 #endif

@@ -18,10 +18,9 @@
 #include "menu.h"
 
 struct global_config global_config = {0};
+static int num_of_boot_entries;
 
 struct boot_entry *get_entry_by_title(struct boot_entry * entry_list, char *title) {
-	int num_of_boot_entries = get_entry_count();
-
 	int i;
 	for (i = 0; i < num_of_boot_entries; i++) {
 		if((entry_list + i)->error)
@@ -45,7 +44,7 @@ void reboot_init(const struct app_descriptor *app)
 	bool boot_into_fastboot = aboot_init();
 	bool pon_reason_is_charger = target_pause_for_battery_charge();
 
-	ret = parse_global_config(&global_config);
+	ret = parse_global_config("hd1p25", &global_config);
 	if(ret < 0) {
 		printf("falied to parse global config: %d\n", ret);
 
@@ -55,9 +54,11 @@ void reboot_init(const struct app_descriptor *app)
 	}
 
 	struct boot_entry *entry_list = NULL;
-	ret = parse_boot_entries(&entry_list);
-	if (ret < 0)
+	ret = num_of_boot_entries = parse_boot_entries("hd1p25", &entry_list);
+	if (ret < 0) {
 		printf("falied to parse boot entries: %d\n", ret);
+		num_of_boot_entries = 0;
+	}
 
 	if(pon_reason_is_charger && global_config.charger_entry_title) {
 		global_config.default_entry = get_entry_by_title(entry_list, global_config.charger_entry_title);
@@ -79,7 +80,7 @@ void reboot_init(const struct app_descriptor *app)
 
 	start_fastboot();
 
-	thread_t *thread = thread_create("menu_thread", &menu_thread, entry_list, DEFAULT_PRIORITY, DEFAULT_STACK_SIZE);
+	thread_t *thread = thread_create("menu_thread", &menu_thread, &( (struct {struct boot_entry *entry_list; int num_of_boot_entries;}){entry_list, num_of_boot_entries} ), DEFAULT_PRIORITY, DEFAULT_STACK_SIZE);
 	if (thread)
 		printf("thread_resume ret: %d\n", thread_resume(thread));
 	else

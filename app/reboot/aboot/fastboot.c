@@ -420,6 +420,16 @@ void fastboot_stage(const void *data, unsigned sz)
 	fastboot_okay("");
 }
 
+unsigned int fastboot_get_staged_size()
+{
+	return download_size;
+}
+
+void fastboot_get_staged(const void *data)
+{
+	memcpy(data, download_base, download_size);
+}
+
 static void cmd_getvar(const char *arg, void *data, unsigned sz)
 {
 	struct fastboot_var *var;
