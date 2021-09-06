@@ -13,6 +13,61 @@
 #define ENTRIES_DIR "/boot/lk2nd/entries"
 #define GLOBAL_CONFIG_FILE "/boot/lk2nd/lk2nd.conf"
 
+struct env_struct {
+	char *env;
+	char *value;
+};
+
+static struct env_struct envs[] = {
+	{"$DEVICE", "samsung-a3u-eur"},
+	{"$SOC", "msm8916"},
+};
+
+int compute_new_len(char *src, struct env_struct *envs, int num_envs) {
+	int new_len = strlen(src);
+	char *c;
+
+	for(int i = 0; i < num_envs; i++) {
+		char *cursor = src;
+		while(c = strstr(cursor, envs[i].env)) {
+			new_len = new_len - strlen(envs[i].env) + strlen(envs[i].value);
+			cursor = c + strlen(envs[i].env);
+		}
+	}
+
+	return new_len;
+}
+
+void strreplace(char *dest, char *src, char *placeholder, char *value)
+{
+	char *start = src;
+	char *cursor = dest;
+	char *c;
+	while (c = strstr(start, placeholder)) {
+		strncpy(cursor, start, c-start);
+		cursor += c-start;
+		strcpy(cursor, value);
+		cursor += strlen(value);
+		c += strlen(placeholder);
+		start = c;
+	}
+	strcpy(cursor, start);
+}
+
+void strreplace_bulk(char *dest, char *src, int max_len, struct env_struct *envs, int num_envs)
+{
+	char *temp = malloc(max_len + 1);
+
+	strcpy(temp, src);
+
+	for(int i = 0; i < num_envs; i++) {
+		strreplace(dest, temp, envs[i].env, envs[i].value);
+		strcpy(temp, dest);
+	}
+
+	free(temp);
+}
+
 int config_parse_option(char **_dest, const char *option, const char *buffer) {
 	char *temp = strstr(buffer, option);
 	if(!temp)
@@ -21,13 +76,17 @@ int config_parse_option(char **_dest, const char *option, const char *buffer) {
 	temp += strlen(option);
 	while (*temp == ' ')
 		temp++;
+
 	char *newline = strchr(temp, '\n');
 	if(newline)
 		*newline = '\0';
-	char *dest = malloc(strlen(temp) + 1);
+
+	int new_len = compute_new_len(temp, envs, ARRAY_SIZE(envs));
+	char *dest = malloc(new_len + 1);
 	if(!dest)
 		return ERR_NO_MEMORY;
-	strcpy(dest, temp);
+
+	strreplace_bulk(dest, temp, new_len + 1, envs, ARRAY_SIZE(envs));
 	*_dest = dest;
 
 	//restore the buffer
