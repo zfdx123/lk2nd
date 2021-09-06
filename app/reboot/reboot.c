@@ -20,20 +20,6 @@
 struct global_config global_config = {0};
 static int num_of_boot_entries;
 
-struct boot_entry *get_entry_by_title(struct boot_entry * entry_list, char *title) {
-	int i;
-	for (i = 0; i < num_of_boot_entries; i++) {
-		if((entry_list + i)->error)
-			continue;
-		if(!strcmp(title, (entry_list + i)->title))
-			return entry_list + i;
-	}
-
-	printf("WARNING: no boot entry with title `%s`\n", title);
-
-	return NULL;
-}
-
 bool FUGLY_boot_to_default_entry = 0;
 extern bool boot_into_recovery;
 
@@ -61,14 +47,14 @@ void reboot_init(const struct app_descriptor *app)
 	}
 
 	if(pon_reason_is_charger && global_config.charger_entry_title) {
-		global_config.default_entry = get_entry_by_title(entry_list, global_config.charger_entry_title);
+		global_config.default_entry = get_entry_by_title(entry_list, num_of_boot_entries, global_config.charger_entry_title);
 		if(!global_config.default_entry && !boot_into_fastboot) { // attempt to use legacy boot instead
 			boot_into_recovery = 0;
 			boot_linux_from_mmc();
 		}
 	}
 	else if(global_config.default_entry_title) {
-		global_config.default_entry = get_entry_by_title(entry_list, global_config.default_entry_title);
+		global_config.default_entry = get_entry_by_title(entry_list, num_of_boot_entries, global_config.default_entry_title);
 	}
 	else {
 		global_config.default_entry = NULL;

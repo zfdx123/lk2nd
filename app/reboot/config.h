@@ -18,10 +18,10 @@ struct boot_entry {
 	bool error;
 };
 
-int get_entry_count(void);
-
 int parse_boot_entries(const char *block_device, struct boot_entry **entry_list);
 
 int parse_global_config(const char *block_device, struct global_config *global_config);
+
+struct boot_entry *get_entry_by_title(struct boot_entry * entry_list, int num_of_boot_entries, char *title);
 
 #endif

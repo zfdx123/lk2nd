@@ -260,3 +260,19 @@ int parse_global_config(const char *block_device, struct global_config *global_c
 
 	return 0;
 }
+
+// as an exception, this function is not for parsing, but for using the parsed information
+
+struct boot_entry *get_entry_by_title(struct boot_entry * entry_list, int num_of_boot_entries, char *title) {
+	int i;
+	for (i = 0; i < num_of_boot_entries; i++) {
+		if((entry_list + i)->error)
+			continue;
+		if(!strcmp(title, (entry_list + i)->title))
+			return entry_list + i;
+	}
+
+	printf("WARNING: no boot entry with title `%s`\n", title);
+
+	return NULL;
+}
