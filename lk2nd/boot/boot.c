@@ -82,6 +82,8 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 
 		dprintf(INFO, "%s\n", mountpoint);
 		print_file_tree(mountpoint, " ");
+
+		action_abootimg_register(mountpoint);
 	}
 
 	/* aboot actions go last in the list. */

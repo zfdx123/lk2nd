@@ -42,4 +42,7 @@ bool file_extension_is(char *name, char *extension);
 /* aboot.c */
 void action_aboot_register(void);
 
+/* abootimg.c */
+void action_abootimg_register(char *root);
+
 #endif /* LK2ND_BOOT_BOOT_H */
