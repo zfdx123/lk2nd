@@ -103,6 +103,10 @@
 #include <lk2nd/device.h>
 #endif
 
+#if WITH_LK2ND_BOOT
+#include <lk2nd/boot.h>
+#endif
+
 extern  bool target_use_signed_kernel(void);
 extern void platform_uninit(void);
 extern void target_uninit(void);
@@ -5555,6 +5559,9 @@ void aboot_init(const struct app_descriptor *app)
 	lk2nd_init();
 #endif
 
+#if WITH_LK2ND_BOOT
+	lk2nd_boot_init();
+#endif
 	/*
 	 * Check power off reason if user force reset,
 	 * if yes phone will do normal boot.
@@ -5623,6 +5630,25 @@ void aboot_init(const struct app_descriptor *app)
 			if(send_delete_keys_to_tz())
 				ASSERT(0);
 		}
+	}
+#endif
+
+#if WITH_LK2ND_BOOT
+	switch (lk2nd_boot_do_action()) {
+	case LK2ND_ABOOT_ACTION_BOOT:
+		boot_into_recovery = 0;
+		boot_into_fastboot = false;
+		break;
+
+	case LK2ND_ABOOT_ACTION_RECOVERY:
+		boot_into_recovery = 1;
+		boot_into_fastboot = false;
+		break;
+
+	case LK2ND_ABOOT_ACTION_FASTBOOT:
+	default:
+		boot_into_fastboot = true;
+		break;
 	}
 #endif
 
