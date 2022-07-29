@@ -7,6 +7,7 @@
 
 enum gpio_devs {
 	GPIOL_DEVICE_INVALID = 0,
+	GPIOL_DEVICE_TLMM,
 };
 
 /**

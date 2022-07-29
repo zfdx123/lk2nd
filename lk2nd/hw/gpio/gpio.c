@@ -8,6 +8,8 @@
 
 #include <lk2nd/gpio.h>
 
+#include "supplier.h"
+
 #define LK2ND_GPIOL_PROP_LEN 32
 
 struct gpio_desc gpiol_get(const void *dtb, int node, const char *name)
@@ -50,6 +52,10 @@ struct gpio_desc gpiol_get(const void *dtb, int node, const char *name)
 int gpiol_direction_input(struct gpio_desc desc)
 {
 	switch (desc.dev) {
+	case GPIOL_DEVICE_TLMM:
+		lk2nd_gpio_tlmm_output_enable(desc.pin, false);
+		break;
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return 0;
@@ -61,6 +67,10 @@ int gpiol_direction_input(struct gpio_desc desc)
 int gpiol_direction_output(struct gpio_desc desc, int value)
 {
 	switch (desc.dev) {
+	case GPIOL_DEVICE_TLMM:
+		lk2nd_gpio_tlmm_output_enable(desc.pin, true);
+		break;
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return 0;
@@ -76,6 +86,10 @@ int gpiol_get_value(struct gpio_desc desc)
 	int val = 0;
 
 	switch (desc.dev) {
+	case GPIOL_DEVICE_TLMM:
+		val = lk2nd_gpio_tlmm_get(desc.pin);
+		break;
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return 0;
@@ -90,6 +104,10 @@ void gpiol_set_value(struct gpio_desc desc, int value)
 		value = !value;
 
 	switch (desc.dev) {
+	case GPIOL_DEVICE_TLMM:
+		lk2nd_gpio_tlmm_set(desc.pin, !!value);
+		return;
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return;
@@ -99,6 +117,9 @@ void gpiol_set_value(struct gpio_desc desc, int value)
 int gpiol_set_config(struct gpio_desc desc, uint32_t config)
 {
 	switch (desc.dev) {
+	case GPIOL_DEVICE_TLMM:
+		return lk2nd_gpio_tlmm_config(desc.pin, config);
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return 0;
