@@ -5583,6 +5583,7 @@ void aboot_init(const struct app_descriptor *app)
 		}
 	}
 #endif
+	boot_into_fastboot = true;
 
 normal_boot:
 	if (!boot_into_fastboot)
