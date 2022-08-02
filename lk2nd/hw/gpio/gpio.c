@@ -56,6 +56,13 @@ int gpiol_direction_input(struct gpio_desc desc)
 		lk2nd_gpio_tlmm_output_enable(desc.pin, false);
 		break;
 
+	case GPIOL_DEVICE_PMIC:
+		return lk2nd_gpio_pmic_set_dir(desc.pin, false, false);
+
+	case GPIOL_DEVICE_PMIC_PON:
+		dprintf(SPEW, "%s: device %d does not support this action.\n", __func__, desc.dev);
+		break;
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return 0;
@@ -69,6 +76,13 @@ int gpiol_direction_output(struct gpio_desc desc, int value)
 	switch (desc.dev) {
 	case GPIOL_DEVICE_TLMM:
 		lk2nd_gpio_tlmm_output_enable(desc.pin, true);
+		break;
+
+	case GPIOL_DEVICE_PMIC:
+		return lk2nd_gpio_pmic_set_dir(desc.pin, true, value);
+
+	case GPIOL_DEVICE_PMIC_PON:
+		dprintf(SPEW, "%s: device %d does not support this action.\n", __func__, desc.dev);
 		break;
 
 	default:
@@ -90,6 +104,14 @@ int gpiol_get_value(struct gpio_desc desc)
 		val = lk2nd_gpio_tlmm_get(desc.pin);
 		break;
 
+	case GPIOL_DEVICE_PMIC:
+		val = lk2nd_gpio_pmic_get(desc.pin);
+		break;
+
+	case GPIOL_DEVICE_PMIC_PON:
+		val = lk2nd_gpio_pmic_pon_get(desc.pin);
+		break;
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return 0;
@@ -108,6 +130,14 @@ void gpiol_set_value(struct gpio_desc desc, int value)
 		lk2nd_gpio_tlmm_set(desc.pin, !!value);
 		return;
 
+	case GPIOL_DEVICE_PMIC:
+		lk2nd_gpio_pmic_set(desc.pin, !!value);
+		return;
+
+	case GPIOL_DEVICE_PMIC_PON:
+		dprintf(INFO, "%s: device %d does not support this action.\n", __func__, desc.dev);
+		break;
+
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);
 		return;
@@ -119,6 +149,13 @@ int gpiol_set_config(struct gpio_desc desc, uint32_t config)
 	switch (desc.dev) {
 	case GPIOL_DEVICE_TLMM:
 		return lk2nd_gpio_tlmm_config(desc.pin, config);
+
+	case GPIOL_DEVICE_PMIC:
+		return lk2nd_gpio_pmic_config(desc.pin, config);
+
+	case GPIOL_DEVICE_PMIC_PON:
+		dprintf(SPEW, "%s: device %d does not support this action.\n", __func__, desc.dev);
+		break;
 
 	default:
 		dprintf(CRITICAL, "%s: device %d is not known.\n", __func__, desc.dev);

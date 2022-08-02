@@ -8,6 +8,8 @@
 enum gpio_devs {
 	GPIOL_DEVICE_INVALID = 0,
 	GPIOL_DEVICE_TLMM,
+	GPIOL_DEVICE_PMIC,
+	GPIOL_DEVICE_PMIC_PON,
 };
 
 /**
@@ -94,5 +96,11 @@ void gpiol_set_value(struct gpio_desc desc, int value);
  * Returns: 0 on success or an error code.
  */
 int gpiol_set_config(struct gpio_desc desc, uint32_t config);
+
+/* Controller-specific macros */
+#define GPIO_PMIC_NUM(num, sid) (((num) & 0xff) | ((sid) & 0xff) << 8)
+
+#define GPIO_PMIC_PWRKEY	1
+#define GPIO_PMIC_RESIN		2
 
 #endif /* LK2ND_GPIO_H */
