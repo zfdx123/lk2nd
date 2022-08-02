@@ -16,8 +16,8 @@ struct gpio_desc gpiol_get(const void *dtb, int node, const char *name)
 {
 	char prop_name[LK2ND_GPIOL_PROP_LEN + 7] = "gpios";
 	const fdt32_t *prop_val;
-	struct gpio_desc pin;
-	uint32_t flags;
+	struct gpio_desc pin = {0};
+	uint32_t flags, config = 0;
 	int len, ret;
 
 	if (name) {
@@ -37,10 +37,17 @@ struct gpio_desc gpiol_get(const void *dtb, int node, const char *name)
 	pin.pin = fdt32_to_cpu(prop_val[1]);
 	pin.dev = fdt32_to_cpu(prop_val[0]) & 0xff;
 	flags = fdt32_to_cpu(prop_val[2]);
-	pin.flags = BITS_SHIFT(flags, 30, 24);
 
-	/* First 3 bytes are initial configuration */
-	ret = gpiol_set_config(pin, BITS_SHIFT(flags, 23, 0));
+	/* Translate core-specific flags */
+	pin.flags |= (flags & GPIO_ACTIVE_LOW ? FLAG_ACTIVE_LOW : 0);
+
+	/* Translate initial pin configuration flags */
+	config |= (flags & GPIO_PULL_UP ? PIN_CONFIG_BIAS_PULL_UP : 0);
+	config |= (flags & GPIO_PULL_DOWN ? PIN_CONFIG_BIAS_PULL_DOWN : 0);
+	config |= (flags & GPIO_INPUT ? PIN_CONFIG_INPUT_ENABLE : 0);
+	config |= (flags & GPIO_OUTPUT ? PIN_CONFIG_OUTPUT_ENABLE : 0);
+
+	ret = gpiol_set_config(pin, config);
 	if (ret < 0) {
 		dprintf(CRITICAL, "gpiol_get failed: Unable to configure gpio: %d\n", len);
 		return gpiol_error(ret);

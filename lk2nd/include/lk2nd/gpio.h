@@ -5,12 +5,7 @@
 #include <stdint.h>
 #include <bits.h>
 
-enum gpio_devs {
-	GPIOL_DEVICE_INVALID = 0,
-	GPIOL_DEVICE_TLMM,
-	GPIOL_DEVICE_PMIC,
-	GPIOL_DEVICE_PMIC_PON,
-};
+#include <dt-bindings/gpio.h>
 
 /**
  * struct gpio_desc - GPIO pin descriptor.
