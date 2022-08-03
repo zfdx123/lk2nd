@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <target.h>
+#include <sys/types.h>
+#include <dev/keys.h>
 
 #include <lk2nd/gpio.h>
 #include <lk2nd/keys.h>
@@ -77,6 +79,23 @@ int lk2nd_keys_pressed(uint32_t keycode)
 	return 0;
 }
 
+static const uint16_t published_keys[] = {
+	KEY_VOLUMEUP,
+	KEY_VOLUMEDOWN,
+	KEY_POWER,
+	KEY_HOME,
+};
+
+static void lk2nd_keys_publish(void)
+{
+	unsigned int i;
+
+	for (i = 0; i < ARRAY_SIZE(published_keys); ++i) {
+		keys_post_event(published_keys[i],
+				lk2nd_keys_pressed(published_keys[i]));
+	}
+}
+
 static int lk2nd_keys_init(const void *dtb, int node)
 {
 	int i = 0, subnode, keycode, len;
@@ -121,6 +140,9 @@ static int lk2nd_keys_init(const void *dtb, int node)
 		dprintf(CRITICAL, "keys: Failed to parse subnodes: %d\n", subnode);
 		return 0;
 	}
+
+	keys_init();
+	lk2nd_keys_publish();
 
 	return 0;
 }
