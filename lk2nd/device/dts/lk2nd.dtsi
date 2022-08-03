@@ -1,6 +1,16 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <dt-bindings/arm/qcom,ids.h>
+#include <dt-bindings/gpio.h>
 
 / {
 	lk2nd: lk2nd { };
+
+	/omit-if-no-ref/ pmic_pon: pmic-pon {
+		compatible = "lk2nd,gpio";
+
+		gpio-controller;
+		#gpio-cells = <2>;
+
+		phandle = <GPIO_DEV_PHANDLE(GPIOL_DEVICE_PMIC_PON)>;
+	};
 };
