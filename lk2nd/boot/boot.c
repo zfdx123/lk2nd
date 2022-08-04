@@ -2,14 +2,17 @@
 /* Copyright (c) 2022 Nikita Travkin <nikita@trvn.ru> */
 
 #include <stdlib.h>
+#include <config.h>
 #include <debug.h>
 #include <list.h>
 #include <lib/bio.h>
 #include <lib/fs.h>
 
 #include <lk2nd/boot.h>
+#include <lk2nd/env.h>
 
 #include "boot.h"
+#include "menu/menu.h"
 
 struct list_node actions_list = LIST_INITIAL_VALUE(actions_list);
 
@@ -59,7 +62,7 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 	struct bdev_struct *bdevs = bio_get_bdevs();
 	char mountpoint[16];
 	bdev_t *bdev;
-	int ret;
+	int ret, timeout;
 
 	dprintf(INFO, "boot: Trying to boot...\n");
 
@@ -106,6 +109,17 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 	 * Step 3: If needed, prompt the user for the menu.
 	 */
 
+#if WITH_LK2ND_BOOT_MENU
+	timeout = atoi(lk2nd_getenv("menu_timeout"));
+	do {
+		best = lk2nd_boot_menu(&actions_list, best, timeout);
+		dprintf(INFO, "boot: Picked %s (%d)\n", best->name, best->priority);
+		ret = best->action(best->data);
+		timeout = -1;
+	} while (ret == LK2ND_ABOOT_ACTION_NONE);
+
+	return ret;
+#else
 	if (best) {
 		dprintf(INFO, "boot: Picked %s (%d)\n", best->name, best->priority);
 		return best->action(best->data);
@@ -113,6 +127,7 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 
 	dprintf(CRITICAL, "boot: No action was performed, requesting fastboot\n");
 	return LK2ND_ABOOT_ACTION_FASTBOOT;
+#endif
 }
 
 /**

@@ -5,6 +5,7 @@ MODULES += \
 	lib/fs \
 	lib/bio \
 	lib/partition \
+	lk2nd/boot/menu \
 
 OBJS += \
 	$(LOCAL_DIR)/boot.o \
