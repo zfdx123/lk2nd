@@ -26,11 +26,19 @@ struct lk2nd_boot_action {
 };
 
 /* util.c */
-void lk2nd_boot_add_action(struct list_node *actions_list, char *name, int priority,
-		enum lk2nd_boot_aboot_action (*action)(void *data), void *data);
 void lk2nd_boot_dump_devices(void);
 void print_file_tree(char *root, char *prefix);
 bool file_extension_is(char *name, char *extension);
+
+/* list.h */
+void lk2nd_boot_add_action(struct list_node *actions_list, char *name, int priority,
+		enum lk2nd_boot_aboot_action (*action)(void *data), void *data);
+void lk2nd_boot_print_actions(struct list_node *actions_list);
+enum lk2nd_boot_aboot_action lk2nd_boot_pick_action(struct list_node *actions_list, bool interactive);
+void action_list_register(struct list_node *actions_list, char *name, int priority, struct list_node *child);
+
+/* menu.c */
+enum lk2nd_boot_aboot_action lk2nd_boot_menu(struct list_node *actions_list);
 
 /* aboot.c */
 void action_aboot_register(struct list_node *actions_list);

@@ -11,7 +11,7 @@
 
 #include "boot.h"
 
-/* Root list */
+/* Top level list */
 struct list_node actions_list = LIST_INITIAL_VALUE(actions_list);
 
 /**
@@ -29,17 +29,12 @@ struct list_node actions_list = LIST_INITIAL_VALUE(actions_list);
  */
 enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 {
-	struct lk2nd_boot_action *entry, *best = NULL;
 	struct bdev_struct *bdevs = bio_get_bdevs();
 	char mountpoint[16];
 	bdev_t *bdev;
 	int ret;
 
 	dprintf(INFO, "boot: Trying to boot...\n");
-
-	/*
-	 * Step 1: Survey for all available boot entries.
-	 */
 
 	list_for_every_entry(&bdevs->list, bdev, bdev_t, node) {
 
@@ -63,30 +58,10 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 	/* aboot actions go last in the list. */
 	action_aboot_register(&actions_list);
 
-	/*
-	 * Step 2: Pick the best default action.
-	 */
-
 	dprintf(INFO, "boot: Available entries:\n");
+	lk2nd_boot_print_actions(&actions_list);
 
-	dprintf(INFO, " | %-32s | Prio |\n", "Name");
-	list_for_every_entry(&actions_list, entry, struct lk2nd_boot_action, node) {
-		dprintf(INFO, " | %-32s | %4d |\n", entry->name, entry->priority);
-	}
-
-	best = list_peek_head_type(&actions_list, struct lk2nd_boot_action, node);
-
-	/*
-	 * Step 3: If needed, prompt the user for the menu.
-	 */
-
-	if (best) {
-		dprintf(INFO, "boot: Picked %s (%d)\n", best->name, best->priority);
-		return best->action(best->data);
-	}
-
-	dprintf(CRITICAL, "boot: No action was performed, requesting fastboot\n");
-	return LK2ND_ABOOT_ACTION_FASTBOOT;
+	return lk2nd_boot_pick_action(&actions_list, true);
 }
 
 /**

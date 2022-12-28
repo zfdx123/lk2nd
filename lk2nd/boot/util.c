@@ -12,38 +12,6 @@
 #include "boot.h"
 
 /**
- * lk2nd_boot_add_action() - Register a new boot action.
- * @actions_list:  A list that this action shall be inserted to.
- * @name:          Label for the entry.
- * @priority:      Entry priority.
- * @action:        A function implementing the action.
- * @data:          Data for that function.
- *
- * The new action will be inserted in the order of priority.
- */
-void lk2nd_boot_add_action(struct list_node *actions_list, char *name, int priority,
-		enum lk2nd_boot_aboot_action (*action)(void *data), void *data)
-{
-	struct lk2nd_boot_action *lp, *act = malloc(sizeof(*act));
-
-	strncpy(act->name, name, LK2ND_BOOT_MAX_NAME_LEN-1);
-	act->priority = priority;
-	act->action = action;
-	act->data = data;
-
-	lp = list_peek_head_type(actions_list, struct lk2nd_boot_action, node);
-
-
-	while (lp && lp->priority > priority)
-		lp = list_next_type(actions_list, &lp->node, struct lk2nd_boot_action, node);
-
-	if (lp)
-		list_add_before(&lp->node, &act->node);
-	else
-		list_add_tail(actions_list, &act->node);
-}
-
-/**
  * dump_devices() - Log a table with all block devices.
  */
 void lk2nd_boot_dump_devices()

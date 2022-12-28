@@ -8,8 +8,8 @@ MODULES += \
 
 OBJS += \
 	$(LOCAL_DIR)/boot.o \
+	$(LOCAL_DIR)/list.o \
 	$(LOCAL_DIR)/menu.o \
-	$(LOCAL_DIR)/render.o \
 	$(LOCAL_DIR)/util.o \
 	$(LOCAL_DIR)/aboot.o \
 	$(LOCAL_DIR)/abootimg.o \
