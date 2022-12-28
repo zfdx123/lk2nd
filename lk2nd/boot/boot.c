@@ -11,34 +11,8 @@
 
 #include "boot.h"
 
+/* Root list */
 struct list_node actions_list = LIST_INITIAL_VALUE(actions_list);
-
-/**
- * lk2nd_boot_add_action() - Register a new boot action.
- *
- * The new action will be inserted in the order of priority.
- */
-void lk2nd_boot_add_action(char *name,	int priority,
-		enum lk2nd_boot_aboot_action (*action)(void *data), void *data)
-{
-	struct lk2nd_boot_action *lp, *act = malloc(sizeof(*act));
-
-	strncpy(act->name, name, LK2ND_BOOT_MAX_NAME_LEN-1);
-	act->priority = priority;
-	act->action = action;
-	act->data = data;
-
-	lp = list_peek_head_type(&actions_list, struct lk2nd_boot_action, node);
-
-
-	while (lp && lp->priority > priority)
-		lp = list_next_type(&actions_list, &lp->node, struct lk2nd_boot_action, node);
-
-	if (lp)
-		list_add_before(&lp->node, &act->node);
-	else
-		list_add_tail(&actions_list, &act->node);
-}
 
 /**
  * lk2nd_boot_do_action() - Boot the OS.
@@ -83,11 +57,11 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 		dprintf(INFO, "%s\n", mountpoint);
 		print_file_tree(mountpoint, " ");
 
-		action_abootimg_register(mountpoint);
+		action_abootimg_register(&actions_list, mountpoint);
 	}
 
 	/* aboot actions go last in the list. */
-	action_aboot_register();
+	action_aboot_register(&actions_list);
 
 	/*
 	 * Step 2: Pick the best default action.

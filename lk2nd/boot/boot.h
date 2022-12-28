@@ -25,24 +25,17 @@ struct lk2nd_boot_action {
 	void *data;
 };
 
-/* boot.c */
-extern struct list_node actions_list;
-
-void lk2nd_boot_add_action(
-		char *name,
-		int priority,
-		enum lk2nd_boot_aboot_action (*action)(void *data),
-		void *data);
-
 /* util.c */
+void lk2nd_boot_add_action(struct list_node *actions_list, char *name, int priority,
+		enum lk2nd_boot_aboot_action (*action)(void *data), void *data);
 void lk2nd_boot_dump_devices(void);
 void print_file_tree(char *root, char *prefix);
 bool file_extension_is(char *name, char *extension);
 
 /* aboot.c */
-void action_aboot_register(void);
+void action_aboot_register(struct list_node *actions_list);
 
 /* abootimg.c */
-void action_abootimg_register(char *root);
+void action_abootimg_register(struct list_node *actions_list, char *root);
 
 #endif /* LK2ND_BOOT_BOOT_H */

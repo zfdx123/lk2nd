@@ -28,13 +28,14 @@ static enum lk2nd_boot_aboot_action action_aboot_poweroff(void *data)
 	return LK2ND_ABOOT_ACTION_NONE;
 }
 
-void action_aboot_register()
+void action_aboot_register(struct list_node *actions_list)
 {
-	lk2nd_boot_add_action("partition: boot", 10, action_aboot,
-			(void*)LK2ND_ABOOT_ACTION_BOOT);
-	lk2nd_boot_add_action("partition: recovery", -10, action_aboot,
-			(void*)LK2ND_ABOOT_ACTION_RECOVERY);
-	lk2nd_boot_add_action("Fastboot", -20, action_aboot,
-			(void*)LK2ND_ABOOT_ACTION_FASTBOOT);
-	lk2nd_boot_add_action("Power off", -30, action_aboot_poweroff, NULL);
+	lk2nd_boot_add_action(actions_list, "partition: boot",
+			10, action_aboot, (void*)LK2ND_ABOOT_ACTION_BOOT);
+	lk2nd_boot_add_action(actions_list, "partition: recovery",
+			-10, action_aboot, (void*)LK2ND_ABOOT_ACTION_RECOVERY);
+	lk2nd_boot_add_action(actions_list, "Fastboot",
+			-20, action_aboot, (void*)LK2ND_ABOOT_ACTION_FASTBOOT);
+	lk2nd_boot_add_action(actions_list, "Power off",
+			-30, action_aboot_poweroff, NULL);
 }

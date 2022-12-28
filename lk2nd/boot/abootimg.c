@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* Copyright (c) 2022 Nikita Travkin <nikita@trvn.ru> */
 
+/**
+ * abootimg.c - Boot an androidboot image from the fs.
+ */
+
 #include <stdlib.h>
 #include <debug.h>
 #include <lib/fs.h>
@@ -45,10 +49,10 @@ static enum lk2nd_boot_aboot_action action_abootimg(void *data)
 
 	dprintf(CRITICAL, "abootimg: Boot failed!\n");
 
-	return LK2ND_ABOOT_ACTION_FASTBOOT;
+	return LK2ND_ABOOT_ACTION_NONE;
 }
 
-void action_abootimg_register(char *root)
+void action_abootimg_register(struct list_node *actions_list, char *root)
 {
 	struct action_abootimg_data *adata;
 	struct dirhandle *dirh;
@@ -90,8 +94,8 @@ void action_abootimg_register(char *root)
 			strcpy(adata->path, path);
 			snprintf(tmp, sizeof(tmp), "Image: %s", path);
 
-			lk2nd_boot_add_action(tmp, priority, action_abootimg,
-					(void*)adata);
+			lk2nd_boot_add_action(actions_list, tmp, priority,
+					      action_abootimg, (void*)adata);
 		}
 
 		ret = fs_close_file(fileh);
