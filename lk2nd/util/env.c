@@ -19,7 +19,6 @@ static const struct def_env {
 	char *name;
 	char *value;
 } default_vars[] = {
-	{ "menu_timeout", "0" },
 };
 
 static int env_strcmp(const void *name, const void *var)
