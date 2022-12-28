@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <debug.h>
+#include <target.h>
 #include <list.h>
 #include <lib/bio.h>
 #include <lib/fs.h>
@@ -13,6 +14,8 @@
 
 /* Top level list */
 struct list_node actions_list = LIST_INITIAL_VALUE(actions_list);
+
+extern void aboot_fastboot_init(void);
 
 /**
  * lk2nd_boot_do_action() - Boot the OS.
@@ -31,6 +34,7 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 {
 	struct bdev_struct *bdevs = bio_get_bdevs();
 	char mountpoint[16];
+	bool interactive;
 	bdev_t *bdev;
 	int ret;
 
@@ -61,7 +65,12 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 	dprintf(INFO, "boot: Available entries:\n");
 	lk2nd_boot_print_actions(&actions_list);
 
-	return lk2nd_boot_pick_action(&actions_list, lk2nd_boot_pressed_key());
+	interactive = !!lk2nd_boot_pressed_key();
+
+	if (interactive)
+		aboot_fastboot_init();
+
+	return lk2nd_boot_pick_action(&actions_list, interactive);
 }
 
 /**

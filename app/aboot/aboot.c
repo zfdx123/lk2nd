@@ -5473,6 +5473,8 @@ void aboot_fastboot_register_commands(void)
 	}
 }
 
+void aboot_fastboot_init(void);
+
 void aboot_init(const struct app_descriptor *app)
 {
 	unsigned reboot_mode = 0;
@@ -5721,6 +5723,20 @@ retry_boot:
 
 fastboot:
 	/* We are here means regular boot did not happen. Start fastboot. */
+	aboot_fastboot_init();
+#if FBCON_DISPLAY_MSG
+	display_fastboot_menu();
+#endif
+}
+
+void aboot_fastboot_init(void)
+{
+	static bool done = false;
+
+	if (done)
+		return;
+
+	done = true;
 
 	/* register aboot specific fastboot commands */
 	fastboot_register_commands();
@@ -5737,9 +5753,6 @@ fastboot:
 	/* Add salt buffer offset at start of image address to copy VB salt */
 	fastboot_init(ADD_SALT_BUFF_OFFSET(target_get_scratch_address()),
 		SUB_SALT_BUFF_OFFSET(target_get_max_flash_size()));
-#endif
-#if FBCON_DISPLAY_MSG
-	display_fastboot_menu();
 #endif
 }
 
