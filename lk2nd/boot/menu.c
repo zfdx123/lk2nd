@@ -33,19 +33,27 @@ static const uint16_t published_keys[] = {
 	KEY_HOME,
 };
 
-static uint32_t wait_key(void)
+
+/**
+ * lk2nd_boot_pressed_key() - Get the pressed key, if any.
+ */
+uint16_t lk2nd_boot_pressed_key(void)
 {
 	unsigned int i;
-	uint32_t keycode = 0;
 
+	for (i = 0; i < ARRAY_SIZE(published_keys); ++i)
+		if (lk2nd_keys_pressed(published_keys[i]))
+			return published_keys[i];
 
-	while (!keycode) {
-		for (i = 0; i < ARRAY_SIZE(published_keys); ++i)
-			if (lk2nd_keys_pressed(published_keys[i]))
-				keycode = published_keys[i];
+	return 0;
+}
 
+static uint16_t wait_key(void)
+{
+	uint16_t keycode = 0;
+
+	while (!(keycode = lk2nd_boot_pressed_key()))
 		mdelay(1);
-	}
 
 	while (lk2nd_keys_pressed(keycode))
 		mdelay(1);

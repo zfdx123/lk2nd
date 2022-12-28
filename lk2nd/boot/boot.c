@@ -61,7 +61,7 @@ enum lk2nd_boot_aboot_action lk2nd_boot_do_action(void)
 	dprintf(INFO, "boot: Available entries:\n");
 	lk2nd_boot_print_actions(&actions_list);
 
-	return lk2nd_boot_pick_action(&actions_list, true);
+	return lk2nd_boot_pick_action(&actions_list, lk2nd_boot_pressed_key());
 }
 
 /**

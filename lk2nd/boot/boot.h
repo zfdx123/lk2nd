@@ -38,6 +38,7 @@ enum lk2nd_boot_aboot_action lk2nd_boot_pick_action(struct list_node *actions_li
 void action_list_register(struct list_node *actions_list, char *name, int priority, struct list_node *child);
 
 /* menu.c */
+uint16_t lk2nd_boot_pressed_key(void);
 enum lk2nd_boot_aboot_action lk2nd_boot_menu(struct list_node *actions_list);
 
 /* aboot.c */
