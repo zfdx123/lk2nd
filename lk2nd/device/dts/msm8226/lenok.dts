@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
+#include <skeleton32.dtsi>
+#include <lk2nd.dtsi>
+
+/ {
+	qcom,msm-id = <199 0x20000>;
+	qcom,board-id = <132 0x0a>;
+};
+
+&lk2nd {
+	lg-lenok {
+		model = "LG G Watch R";
+		compatible = "lg,lenok";
+	};
+};
